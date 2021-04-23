@@ -42,7 +42,7 @@ export class Bill {
                 const usageTypes: string[] = this._rows.filter(r => r[productCode] === name && +r[costBeforeTax] > 0).map(r => r[usageType]);
                 let details: Detail[] = [];
                 usageTypes.forEach(type => {
-                    const rowsOfUsageType: string[][] = this._rows.filter(r => r[usageType] === type);
+                    const rowsOfUsageType: string[][] = this._rows.filter(r => r[productCode] === name &&r[usageType] === type);
                     if (rowsOfUsageType?.length) {
                         const description = rowsOfUsageType[0][itemDescription];
                         details.push({
