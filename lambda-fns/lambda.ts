@@ -45,7 +45,7 @@ exports.handler = async function (event: any) {
             const prevBillData: BillData | null = await billDataTool.readPreviousBill(workBucket);
             const diffs = bill.diff(prevBillData);
             result.diffs = diffs;
-            result.diff = diffs.total;
+            result.diff = diffs.totalDiff;
 
             await billDataTool.writeCurrentBill(workBucket, currentBillData);
 

@@ -65,7 +65,7 @@ export class Bill {
     };
 
     public diff(prevBill: BillData | null): BillDiffs {
-        if (!prevBill) return { categories: [], total: new Amount(0) };
+        if (!prevBill) return { categories: [], totalDiff: new Amount(0) };
         if (!this._initialized) throw new Error('BillData is not initialized');
         let prevMap = this.makeMap(prevBill.categories);
         let curMap = this.makeMap(this._billData.categories);
@@ -84,7 +84,7 @@ export class Bill {
                 categoryTotal += amount;
             }
         })
-        let diffs: BillDiffs = { categories: categories.sort((a, b) => a.name.localeCompare(b.name)), total: new Amount(categoryTotal) };
+        let diffs: BillDiffs = { categories: categories.sort((a, b) => a.name.localeCompare(b.name)), totalDiff: new Amount(categoryTotal) };
         console.log('diffs: ', JSON.stringify(diffs));
         return diffs;
     }

@@ -47,7 +47,7 @@ export interface BillData {
 
 export interface BillDiffs {
     categories: Category[];
-    total: Amount;
+    totalDiff: Amount;
 }
 
 export interface S3EventBucket {
