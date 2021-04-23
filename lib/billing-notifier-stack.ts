@@ -6,8 +6,9 @@ import { Topic } from '@aws-cdk/aws-sns';
 import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
 // import * as events from '@aws-cdk/aws-lambda-event-sources';
 
-const billingBucketName = process.env.BILLING_BUCKET;
-const notificationEmail = process.env.NOTIFICATION_EMAIL;
+const billingBucketName = process.env.BILLING_BUCKET!;
+const notificationEmail = process.env.NOTIFICATION_EMAIL!;
+const nickname = process.env.AWS_ACCOUNT_NICKNAME || billingBucketName;
 
 export class BillingNotifierStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -31,6 +32,7 @@ export class BillingNotifierStack extends cdk.Stack {
       environment: {
         WORK_BUCKET: bucket.bucketName,
         BILL_BUCKET: billingBucket.bucketName,
+        AWS_ACCOUNT_NICKNAME: nickname,
         TOPIC_ARN: snsTopic.topicArn
       },
     });
@@ -54,6 +56,6 @@ export class BillingNotifierStack extends cdk.Stack {
 
     // aws s3api put-bucket-notification-configuration
     // replaces current config
-    
+
   }
 }

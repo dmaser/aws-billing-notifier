@@ -6,6 +6,7 @@ import { BillDataTool } from './lib/bill-data-tool';
 
 const workBucket = process.env.WORK_BUCKET!;
 const billBucket = process.env.BILL_BUCKET!;
+const nickname = process.env.AWS_ACCOUNT_NICKNAME!;
 
 exports.handler = async function (event: any) {
 
@@ -54,7 +55,7 @@ exports.handler = async function (event: any) {
             result.error = e;
         }
 
-        const notification = new BillNotification(`AWS Bill update ${day} $${result.current?.total?.trunc() || '0.00'} (+${result.diff?.trunc()})`, JSON.stringify(result, null, 4));
+        const notification = new BillNotification(`[${nickname}] AWS Bill ${day} $${result.current?.total?.trunc() || '0.00'} (+${result.diff?.trunc()})`, JSON.stringify(result, null, 4));
         await notification.send();
         
     } else if (items.length) {
