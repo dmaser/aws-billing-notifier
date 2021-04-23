@@ -4,8 +4,8 @@ import { BillNotification } from './lib/bill-notification';
 import { S3EventRecord, BillCheckResult, BillData } from './lib/bill-util-types';
 import { BillDataTool } from './lib/bill-data-tool';
 
-const workBucket = process.env.WORK_BUCKET!
-const billBucket = process.env.BILL_BUCKET!
+const workBucket = process.env.WORK_BUCKET!;
+const billBucket = process.env.BILL_BUCKET!;
 
 exports.handler = async function (event: any) {
 
