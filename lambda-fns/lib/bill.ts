@@ -84,7 +84,7 @@ export class Bill {
                 categoryTotal += amount;
             }
         })
-        let diffs: BillDiffs = { categories: categories.sort((a, b) => a.name.localeCompare(b.name)), totalDiff: new Amount(categoryTotal) };
+        let diffs: BillDiffs = { categories: categories.sort((a, b) => b.amount.val - a.amount.val), totalDiff: new Amount(categoryTotal) };
         console.log('diffs: ', JSON.stringify(diffs));
         return diffs;
     }
