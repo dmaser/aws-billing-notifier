@@ -117,6 +117,7 @@ export class Bill {
                 }
             }
         });
+        details.sort((a,b) => b.amount.val-a.amount.val);
         console.log('diffDetails - prevDetails: ', JSON.stringify(prevDetails));
         console.log('diffDetails - curDetails: ', JSON.stringify(curDetails));
         console.log('diffDetails - diff: ', JSON.stringify(details));
