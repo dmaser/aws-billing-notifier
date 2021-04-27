@@ -42,7 +42,7 @@ export class Bill {
                 const usageTypes: string[] = this._rows.filter(r => r[productCode] === name && +r[costBeforeTax] > 0).map(r => r[usageType]);
                 let details: Detail[] = [];
                 usageTypes.forEach(type => {
-                    const rowsOfUsageType: string[][] = this._rows.filter(r => r[productCode] === name &&r[usageType] === type);
+                    const rowsOfUsageType: string[][] = this._rows.filter(r => r[productCode] === name && r[usageType] === type);
                     if (rowsOfUsageType?.length) {
                         const description = rowsOfUsageType[0][itemDescription];
                         details.push({
@@ -55,10 +55,12 @@ export class Bill {
                         console.warn(`Found 0 rows for usageType ${type}, but should've found more?`);
                     }
                 });
+                details.sort((a, b) => b.amount.val - a.amount.val);
                 const cat: Category = { name, amount: new Amount(amount), details };
                 billData.categories.push(cat);
             }
         }
+        billData.categories.sort((a, b) => b.amount.val - a.amount.val);
         this._billData = billData;
         this._initialized = true;
         return billData;
@@ -117,7 +119,7 @@ export class Bill {
                 }
             }
         });
-        details.sort((a,b) => b.amount.val-a.amount.val);
+        details.sort((a, b) => b.amount.val - a.amount.val);
         console.log('diffDetails - prevDetails: ', JSON.stringify(prevDetails));
         console.log('diffDetails - curDetails: ', JSON.stringify(curDetails));
         console.log('diffDetails - diff: ', JSON.stringify(details));
