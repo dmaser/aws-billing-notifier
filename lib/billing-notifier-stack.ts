@@ -30,6 +30,7 @@ export class BillingNotifierStack extends cdk.Stack {
       code: lambda.Code.fromAsset('lambda-fns'),
       handler: 'lambda.handler',
       environment: {
+        TZ: 'America/Los_Angeles',
         WORK_BUCKET: bucket.bucketName,
         BILL_BUCKET: billingBucket.bucketName,
         AWS_ACCOUNT_NICKNAME: nickname,

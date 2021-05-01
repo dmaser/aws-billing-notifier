@@ -67,6 +67,8 @@ export interface S3EventRecord {
 }
 export interface BillCheckResult {
     msg: string;
+    timestamp: number;
+    dateTime: string;
     diffs?: BillDiffs;
     current: BillData | null;
     error: Error | '';
