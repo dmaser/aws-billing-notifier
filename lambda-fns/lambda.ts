@@ -65,6 +65,8 @@ exports.handler = async function (event: any) {
 
     } else if (items.length) {
         console.log('NO MATCHED ITEMS - re pattern: ', re);
+        const found = items.map(i => i.s3?.object?.key).join(', ');
+        console.log(`Items found: ${found}`);
     }
 
 
