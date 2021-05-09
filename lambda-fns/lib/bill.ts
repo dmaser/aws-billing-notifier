@@ -74,19 +74,26 @@ export class Bill {
         const catNames = new Set([...prevMap.keys(), ...curMap.keys()]);
         const categories: Category[] = [];
         let categoryTotal = 0;
-        catNames.forEach(cn => {
-            const curCat = curMap.get(cn);
-            const prevCat = prevMap.get(cn);
-            const amount = (curCat?.amount.val || 0) - (prevCat?.amount.val || 0);
+        catNames.forEach(catName => {
+            const curCat = curMap.get(catName);
+            const prevCat = prevMap.get(catName);
+            const catValDiff = (curCat?.amount.val || 0) - (prevCat?.amount.val || 0);
             const curDetails = curCat?.details || [];
             const prevDetails = prevCat?.details || [];
             const detailDiff = this.diffDetails(prevDetails, curDetails);
-            if (amount > 0 || detailDiff.length) {
-                categories.push({ name: cn, amount: new Amount(amount), details: detailDiff });
-                categoryTotal += amount;
+            if (catValDiff > 0 || detailDiff.length) {
+                categories.push({
+                    name: catName,
+                    amount: new Amount(catValDiff),
+                    details: detailDiff
+                });
+                categoryTotal += catValDiff;
             }
         })
-        let diffs: BillDiffs = { categories: categories.sort((a, b) => b.amount.val - a.amount.val), totalDiff: new Amount(categoryTotal) };
+        let diffs: BillDiffs = {
+            categories: categories.sort((a, b) => b.amount.val - a.amount.val),
+            totalDiff: new Amount(categoryTotal)
+        };
         console.log('diffs: ', JSON.stringify(diffs));
         return diffs;
     }
