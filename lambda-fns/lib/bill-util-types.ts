@@ -6,7 +6,7 @@ export class Amount {
     private _prefix: string;
 
     constructor(val: number | string, precision: number = 2, prefix: string = '$') {
-        this.val = +val;
+        this.val = Number(val);
         this._precision = precision;
         this._prefix = prefix;
     }
