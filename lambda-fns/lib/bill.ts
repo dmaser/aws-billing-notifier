@@ -91,6 +91,7 @@ export class Bill {
             }
         })
         const taxDiff = (this._billData.tax.val - prevBill.tax.val) || 0;
+        console.log(`taxDiff: ${taxDiff} [${this._billData.tax.val} - ${prevBill.tax.val}]`);
         let diffs: BillDiffs = {
             categories: categories.sort((a, b) => b.amount.val - a.amount.val),
             taxDiff: new Amount(taxDiff),

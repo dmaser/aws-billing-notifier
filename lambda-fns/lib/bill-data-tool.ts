@@ -35,7 +35,7 @@ export class BillDataTool {
     }
 
     private reviver = (key: string, value: any) => {
-        if (key === 'usageQty' || key === 'amount') {
+        if (key === 'usageQty' || key === 'amount' || key === 'tax') {
             value = new Amount(value);
         }
         return value;
