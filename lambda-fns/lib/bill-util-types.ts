@@ -47,6 +47,7 @@ export interface BillData {
 
 export interface BillDiffs {
     categories: Category[];
+    taxDiff: Amount;
     totalDiff: Amount;
 }
 
