@@ -72,6 +72,7 @@ export interface BillCheckResult {
     dateTime: string;
     diffs?: BillDiffs;
     current: BillData | null;
+    paid: BillData[];
     error: Error | '';
     diff: Amount | null;
 }
