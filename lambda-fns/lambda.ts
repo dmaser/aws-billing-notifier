@@ -30,14 +30,14 @@ exports.handler = async function (event: any) {
 
         console.log('S3EventRecord match found: ', JSON.stringify(matchedRecord));
 
-        let result: BillCheckResult = { msg: '', timestamp: 0, dateTime: '', diffs: undefined, current: null, error: '', diff: null };
+        let billCheckResult: BillCheckResult = { msg: '', timestamp: 0, dateTime: '', diffs: undefined, current: null, paid: [], error: '', diff: null };
         try {
 
             const bucket = matchedRecord.s3.bucket.name;
             const key = matchedRecord.s3.object.key;
-            result.msg = `retrieving ${key} from ${bucket}`;
-            result.timestamp = cal.date().getTime();
-            result.dateTime = cal.now();
+            billCheckResult.msg = `retrieving ${key} from ${bucket}`;
+            billCheckResult.timestamp = cal.date().getTime();
+            billCheckResult.dateTime = cal.now();
 
             const billDataTool: BillDataTool = new BillDataTool(key, cal);
             const obj = await billDataTool.fetchCurrentBill(billBucket);
@@ -46,21 +46,25 @@ exports.handler = async function (event: any) {
 
             const bill = new Bill(rows);
             const currentBillData: BillData = bill.build();
-            result.current = currentBillData;
+            billCheckResult.current = currentBillData;
 
             const prevBillData: BillData | null = await billDataTool.readPreviousBill(workBucket);
             const diffs = bill.diff(prevBillData);
-            result.diffs = diffs;
-            result.diff = diffs.totalDiff;
+            billCheckResult.diffs = diffs;
+            billCheckResult.paid = bill.paid();
+            billCheckResult.diff = diffs.totalDiff;
 
             await billDataTool.writeCurrentBill(workBucket, currentBillData);
 
         } catch (e) {
             console.error('error retrieving object: ', e);
-            result.error = e;
+            billCheckResult.error = e;
         }
 
-        const notification = new BillNotification(`[${nickname}] AWS Bill ${day} $${result.current?.total?.trunc() || '0.00'} (+${result.diff?.trunc()})`, JSON.stringify(result, null, 4));
+        const totalPaid = billCheckResult.paid.map(p => p.total.val).reduce((prev, curr) => prev + curr, 0);
+        let subject = `[${nickname}] AWS Bill ${day} $${billCheckResult.current?.total?.trunc() || '0.00'} (+${billCheckResult.diff?.trunc()})`;
+        if (totalPaid > 0) subject += '  Paid: ' + totalPaid.toFixed(2);
+        const notification = new BillNotification(subject, JSON.stringify(billCheckResult, null, 4));
         await notification.send();
 
     } else if (items.length) {

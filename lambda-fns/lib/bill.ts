@@ -1,70 +1,126 @@
 import { Amount, BillData, BillDiffs, Category, Detail, USAGE_QTY_PRECISION } from './bill-util-types';
 
+const ZERO = new Amount(0);
+
 export class Bill {
 
     private _rows: string[][];
     private _initialized = false;
     private _billData: BillData;
 
+    private invoiceId: number;
+    private recordType: number;
+    private productCode: number;
+    private usageType: number;
+    private itemDescription: number;
+    private usageQuantity: number;
+    private taxAmount: number;
+    private costBeforeTax: number;
+    private totalCost: number;
+
+    private otherBillData: BillData[] = [];
+
     constructor(rows: string[][]) {
         this._rows = rows;
-    }
-
-    public build(): BillData {
         const headings: string[] = this._rows.shift() || [];
         console.log(`headings: ${headings.join(', ')}`);
-        const recordType = headings.indexOf('RecordType');
-        const productCode = headings.indexOf('ProductCode');
-        const productName = headings.indexOf('ProductName');
-        const usageType = headings.indexOf('UsageType');
-        const operation = headings.indexOf('Operation');
-        const itemDescription = headings.indexOf('ItemDescription');
-        const usageQuantity = headings.indexOf('UsageQuantity');
-        const taxAmount = headings.indexOf('TaxAmount');
-        const costBeforeTax = headings.indexOf('CostBeforeTax');
-        const totalCost = headings.indexOf('TotalCost');
-        const items = this._rows.filter(r => r[productCode] != '');
-        console.log(`got ${items.length} items from ${this._rows.length} rows`);
-        const map: Map<string, number> = new Map();
-        items.forEach(i => {
-            // console.log(`i[productCode]: ${i[productCode]}, totalCost: ${i[totalCost]}`);
-            map.set(i[productCode], +i[costBeforeTax] + (map.get(i[productCode]) || 0));
+        this.invoiceId = headings.indexOf('InvoiceID');
+        this.recordType = headings.indexOf('RecordType');
+        this.productCode = headings.indexOf('ProductCode');
+        // this.productName = headings.indexOf('ProductName');
+        this.usageType = headings.indexOf('UsageType');
+        // this.operation = headings.indexOf('Operation');
+        this.itemDescription = headings.indexOf('ItemDescription');
+        this.usageQuantity = headings.indexOf('UsageQuantity');
+        this.taxAmount = headings.indexOf('TaxAmount');
+        this.costBeforeTax = headings.indexOf('CostBeforeTax');
+        this.totalCost = headings.indexOf('TotalCost');
+    }
+
+    public build() {
+        const invoiceIds = Array.from(new Set(this._rows.map(r => r[this.invoiceId])));
+        console.log(`Found ${invoiceIds.length} invoice IDs: ${invoiceIds.join(', ')}`);
+
+        let invoicedRowCount = 0;
+        invoiceIds.filter(id => id !== 'Estimated' && id.trim().length > 0).forEach(id => {
+            const invoicedRows = this._rows.filter(r => r[this.invoiceId] === id);
+            invoicedRowCount += invoicedRows.length;
+            this.addOtherBillData(invoicedRows);
         });
+
+        const estimatedRows = this._rows.filter(r => r[this.invoiceId] === 'Estimated');
+        const itemsByProductCode = estimatedRows.filter(r => r[this.productCode] != '');
+        console.log(`Total rows: ${this._rows.length},  Estimated rows: ${estimatedRows.length}, Rows with ProductCode: ${itemsByProductCode.length}, Invoiced rows: ${invoicedRowCount}`);
+
+        const estimatedProductCodeTotals = this.makeProductCodeTotalMap(itemsByProductCode);
         // console.log('map: ', map);
-        const zero = new Amount(0);
-        let billData: BillData = { categories: [], tax: zero, total: zero, totalBeforeTax: zero };
-        billData.totalBeforeTax = new Amount((this._rows.find(r => r[recordType] === 'StatementTotal') || [])[costBeforeTax]);
-        billData.tax = new Amount((this._rows.find(r => r[recordType] === 'StatementTotal') || [])[taxAmount]);
-        billData.total = new Amount((this._rows.find(r => r[recordType] === 'StatementTotal') || [])[totalCost]);
-        for (const name of map.keys()) {
-            const amount = map.get(name) || 0;
-            if (amount > 0) {
-                const usageTypes: string[] = this._rows.filter(r => r[productCode] === name && +r[costBeforeTax] > 0).map(r => r[usageType]);
-                let details: Detail[] = [];
-                usageTypes.forEach(type => {
-                    const rowsOfUsageType: string[][] = this._rows.filter(r => r[productCode] === name && r[usageType] === type);
-                    if (rowsOfUsageType?.length) {
-                        const description = rowsOfUsageType[0][itemDescription];
-                        details.push({
-                            usageType: type,
-                            usageQty: new Amount(rowsOfUsageType.reduce((prev, cur) => prev + +cur[usageQuantity], 0) || 0, USAGE_QTY_PRECISION, ''),
-                            amount: new Amount(rowsOfUsageType.reduce((prev, cur) => prev + +cur[costBeforeTax], 0) || 0),
-                            description
-                        });
-                    } else {
-                        console.warn(`Found 0 rows for usageType ${type}, but should've found more?`);
-                    }
+
+        this._billData = this.buildBillData(estimatedRows, estimatedProductCodeTotals);
+        this._billData.totalBeforeTax = new Amount((estimatedRows.find(r => r[this.recordType] === 'InvoiceTotal') || [])[this.costBeforeTax]);
+        this._billData.tax = new Amount((estimatedRows.find(r => r[this.recordType] === 'InvoiceTotal') || [])[this.taxAmount]);
+        this._billData.total = new Amount((estimatedRows.find(r => r[this.recordType] === 'InvoiceTotal') || [])[this.totalCost]);
+        this._initialized = true;
+        return this._billData;
+    };
+
+    private makeProductCodeTotalMap(items: string[][]): Map<string, Amount> {
+        const productCodeTotalsMap: Map<string, Amount> = new Map();
+        items.forEach(i => {
+            const cur: Amount = productCodeTotalsMap.get(i[this.productCode]) || ZERO;
+            productCodeTotalsMap.set(i[this.productCode], new Amount(+i[this.costBeforeTax] + cur.val));
+        });
+        return productCodeTotalsMap;
+    }
+
+    private buildCategory(name: string, amount: Amount): Category {
+        const productCodeRows = this._rows.filter(r => r[this.productCode] === name);
+        const usageTypes: string[] = productCodeRows.filter(r => +r[this.costBeforeTax] > 0).map(r => r[this.usageType]);
+        let details: Detail[] = [];
+        usageTypes.forEach(type => {
+            const rowsOfUsageType: string[][] = productCodeRows.filter(r => r[this.usageType] === type);
+            if (rowsOfUsageType?.length) {
+                const description = rowsOfUsageType[0][this.itemDescription];
+                details.push({
+                    usageType: type,
+                    usageQty: new Amount(rowsOfUsageType.reduce((prev, cur) => prev + +cur[this.usageQuantity], 0) || 0, USAGE_QTY_PRECISION, ''),
+                    amount: new Amount(rowsOfUsageType.reduce((prev, cur) => prev + +cur[this.costBeforeTax], 0) || 0),
+                    description
                 });
-                details.sort((a, b) => b.amount.val - a.amount.val);
-                const cat: Category = { name, amount: new Amount(amount), details };
+            } else {
+                console.warn(`Found 0 rows for usageType ${type}, but should've found more?`);
+            }
+        });
+        details.sort((a, b) => b.amount.val - a.amount.val);
+        return { name, amount, details };
+    }
+
+    private buildBillData(rows: string[][], productCodeTotalsMap: Map<string, Amount>): BillData {
+        let billData: BillData = { categories: [], tax: ZERO, total: ZERO, totalBeforeTax: ZERO };
+        for (const name of productCodeTotalsMap.keys()) {
+            const amount = productCodeTotalsMap.get(name) || ZERO;
+            if (amount.val > 0) {
+                const cat = this.buildCategory(name, amount);
                 billData.categories.push(cat);
             }
         }
         billData.categories.sort((a, b) => b.amount.val - a.amount.val);
-        this._billData = billData;
-        this._initialized = true;
         return billData;
-    };
+    }
+
+    private addOtherBillData(rows: string[][]) {
+        const itemRows = rows.filter(r => r[this.productCode] != '');
+        const totalsMap = this.makeProductCodeTotalMap(itemRows);
+        const otherBill = this.buildBillData(rows, totalsMap);
+        otherBill.totalBeforeTax = new Amount((rows.find(r => r[this.recordType] === 'InvoiceTotal') || [])[this.costBeforeTax]);
+        otherBill.tax = new Amount((rows.find(r => r[this.recordType] === 'InvoiceTotal') || [])[this.taxAmount]);
+        otherBill.total = new Amount((rows.find(r => r[this.recordType] === 'InvoiceTotal') || [])[this.totalCost]);
+        this.otherBillData.push(otherBill);
+    }
+
+    public paid(): BillData[] {
+        if (!this._initialized) throw new Error('BillData is not initialized');
+        return this.otherBillData;
+    }
 
     public diff(prevBill: BillData | null): BillDiffs {
         if (!prevBill) return { categories: [], taxDiff: new Amount(0), totalDiff: new Amount(0) };
