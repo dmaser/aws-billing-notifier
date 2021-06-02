@@ -63,7 +63,7 @@ exports.handler = async function (event: any) {
 
         const totalPaid = billCheckResult.paid.map(p => p.total.val).reduce((prev, curr) => prev + curr, 0);
         let subject = `[${nickname}] AWS Bill ${day} $${billCheckResult.current?.total?.trunc() || '0.00'} (+${billCheckResult.diff?.trunc()})`;
-        if (totalPaid > 0) subject += '  Paid: ' + totalPaid.toFixed(2);
+        if (totalPaid > 0) subject += '  Paid: $' + totalPaid.toFixed(2);
         const notification = new BillNotification(subject, JSON.stringify(billCheckResult, null, 4));
         await notification.send();
 

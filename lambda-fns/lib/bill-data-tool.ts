@@ -43,6 +43,7 @@ export class BillDataTool {
 
     async readPreviousBill(updatesBucket: string): Promise<BillData | null> {
         console.log(`readPreviousBill from: ${updatesBucket}/${this.prevBillDataKey}`);
+        if (this._cal.isFirstDayOfMonth()) return null;
         try {
             const updateObj = await new s3().getObject({ Bucket: updatesBucket, Key: this.prevBillDataKey }).promise();
             return JSON.parse(updateObj.Body as string, this.reviver) as BillData;

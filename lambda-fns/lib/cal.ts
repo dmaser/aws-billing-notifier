@@ -31,6 +31,10 @@ export class Cal {
         return this.fmt(t, fmt);
     }
 
+    public isFirstDayOfMonth(): boolean {
+        return /01$/.test(this.today());
+    }
+
     public yesterday(fmt: CalFormat = CalFormat.Y_MO_DAY) {
         const t = new Date(this._date.getTime() - (this._tzOffsetMs + this.DAY_IN_MS)).toISOString();
         return this.fmt(t, fmt);
