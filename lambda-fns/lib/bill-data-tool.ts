@@ -2,6 +2,7 @@ import { Amount, BillData } from './bill-util-types';
 import { Cal } from './cal';
 import s3 = require('aws-sdk/clients/s3');
 
+export const UPDATES_PREFIX = 'updates';
 export class BillDataTool {
 
     private _key: string;
@@ -11,7 +12,7 @@ export class BillDataTool {
     private currentBillDataKey: string;
     private prevBillDataKey: string;
 
-    constructor(key: string, date: Cal, updatesPrefix: string = 'updates') {
+    constructor(key: string, date: Cal, updatesPrefix: string = UPDATES_PREFIX) {
         this._key = key;
         this._cal = date;
         this._updatesPrefix = updatesPrefix;
