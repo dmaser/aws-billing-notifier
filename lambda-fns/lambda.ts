@@ -1,9 +1,10 @@
 import parse = require('csv-parse/lib/sync');
 import { Bill } from './lib/bill';
 import { BillNotification } from './lib/bill-notification';
-import { S3EventRecord, BillCheckResult, BillData } from './lib/bill-util-types';
+import { BillCheckResult, BillData } from './lib/bill-util-types';
 import { BillDataTool } from './lib/bill-data-tool';
 import { Cal, CalFormat } from './lib/cal';
+import { S3EventRecord } from './lib/s3-types';
 
 const workBucket = process.env.WORK_BUCKET!;
 const billBucket = process.env.BILL_BUCKET!;
