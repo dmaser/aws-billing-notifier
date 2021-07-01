@@ -1,4 +1,4 @@
-import { Amount, BillData, BillDiffs, Category, Detail, USAGE_QTY_PRECISION } from './bill-util-types';
+import { Amount, BillData, Category, Detail, USAGE_QTY_PRECISION } from './bill-util-types';
 
 const ZERO = new Amount(0);
 
@@ -122,8 +122,8 @@ export class Bill {
         return this.otherBillData;
     }
 
-    public diff(prevBill: BillData | null): BillDiffs {
-        if (!prevBill) return { categories: [], taxDiff: new Amount(0), totalDiff: new Amount(0) };
+    public diff(prevBill: BillData | null): BillData {
+        if (!prevBill) return { categories: [], totalBeforeTax: new Amount(0), tax: new Amount(0), total: new Amount(0) };
         if (!this._initialized) throw new Error('BillData is not initialized');
         let prevMap = this.makeMap(prevBill.categories);
         let curMap = this.makeMap(this._billData.categories);
@@ -148,10 +148,11 @@ export class Bill {
         })
         const taxDiff = (this._billData.tax.val - prevBill.tax.val) || 0;
         console.log(`taxDiff: ${taxDiff} [${this._billData.tax.val} - ${prevBill.tax.val}]`);
-        let diffs: BillDiffs = {
+        let diffs: BillData = {
             categories: categories.sort((a, b) => b.amount.val - a.amount.val),
-            taxDiff: new Amount(taxDiff),
-            totalDiff: new Amount(categoryTotal + taxDiff)
+            totalBeforeTax: new Amount(categoryTotal),
+            tax: new Amount(taxDiff),
+            total: new Amount(categoryTotal + taxDiff)
         };
         console.log('diffs: ', JSON.stringify(diffs));
         return diffs;

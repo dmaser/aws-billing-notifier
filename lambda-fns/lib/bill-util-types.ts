@@ -38,6 +38,7 @@ export interface Category {
     name: string;
     amount: Amount;
 };
+
 export interface BillData {
     categories: Category[];
     totalBeforeTax: Amount;
@@ -45,32 +46,11 @@ export interface BillData {
     total: Amount;
 };
 
-export interface BillDiffs {
-    categories: Category[];
-    taxDiff: Amount;
-    totalDiff: Amount;
-}
-
-export interface S3EventBucket {
-    name: string;
-}
-export interface S3EventObject {
-    key: string;
-    size: number;
-}
-export interface S3Event {
-    bucket: S3EventBucket;
-    object: S3EventObject;
-}
-export interface S3EventRecord {
-    eventSource: string;
-    s3: S3Event;
-}
 export interface BillCheckResult {
     msg: string;
     timestamp: number;
     dateTime: string;
-    diffs?: BillDiffs;
+    diffs?: BillData;
     current: BillData | null;
     paid: BillData[];
     error: Error | '';
