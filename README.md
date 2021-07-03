@@ -2,7 +2,7 @@
 
 Sends a notification (currently an SQS email endpoint) whenever the detailed bill is updated by AWS. Email contains JSON data with the differences from yesterday's version of the bill and the current totals, grouped by category (ProductCode) and details (UsageType).
 
-## Pre-requisites
+## Prerequisites
 
 * Enable AWS detailed billing
   * TBD - Announced [here](https://aws.amazon.com/blogs/aws/aws-detailed-billing-reports/) in 2012, but [this page](https://docs.aws.amazon.com/cur/latest/userguide/detailed-billing.html) says it's no longer available. I was able to enable DBR in an account created in 2020.
