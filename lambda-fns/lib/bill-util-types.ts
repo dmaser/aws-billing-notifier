@@ -39,12 +39,12 @@ export interface Category {
     amount: Amount;
 };
 
-export interface LineItem {
+export interface LineItems {
     [key:string]: string;
 }
 
 export interface BillData {
-    summary: LineItem[];
+    summary: LineItems;
     categories: Category[];
     totalBeforeTax: Amount;
     tax: Amount;

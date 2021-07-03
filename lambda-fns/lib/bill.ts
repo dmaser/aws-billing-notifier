@@ -1,4 +1,4 @@
-import { Amount, BillData, Category, Detail, USAGE_QTY_PRECISION, LineItem } from './bill-util-types';
+import { Amount, BillData, Category, Detail, USAGE_QTY_PRECISION, LineItems } from './bill-util-types';
 
 const ZERO = new Amount(0);
 
@@ -95,13 +95,13 @@ export class Bill {
     }
 
     private buildBillData(rows: string[][], productCodeTotalsMap: Map<string, Amount>): BillData {
-        let billData: BillData = { summary: [], categories: [], tax: ZERO, total: ZERO, totalBeforeTax: ZERO };
+        let billData: BillData = { summary: {}, categories: [], tax: ZERO, total: ZERO, totalBeforeTax: ZERO };
         for (const name of productCodeTotalsMap.keys()) {
             const amount = productCodeTotalsMap.get(name) || ZERO;
             if (amount.val > 0) {
                 const cat = this.buildCategory(name, amount);
                 billData.categories.push(cat);
-                billData.summary.push({ [name]: amount.trunc() });
+                billData.summary[name] = amount.trunc();
             }
         }
         billData.categories.sort((a, b) => b.amount.val - a.amount.val);
@@ -124,12 +124,12 @@ export class Bill {
     }
 
     public diff(prevBill: BillData | null): BillData {
-        if (!prevBill) return { summary: [], categories: [], totalBeforeTax: new Amount(0), tax: new Amount(0), total: new Amount(0) };
+        if (!prevBill) return { summary: {}, categories: [], totalBeforeTax: new Amount(0), tax: new Amount(0), total: new Amount(0) };
         if (!this._initialized) throw new Error('BillData is not initialized');
         let prevMap = this.makeMap(prevBill.categories);
         let curMap = this.makeMap(this._billData.categories);
         const catNames = new Set([...prevMap.keys(), ...curMap.keys()]);
-        const categories: Category[] = [], summary: LineItem[] = [];
+        const categories: Category[] = [], summary: LineItems = {};
         let categoryTotal = 0;
         catNames.forEach(catName => {
             const curCat = curMap.get(catName);
@@ -145,7 +145,7 @@ export class Bill {
                     details: detailDiff
                 });
                 categoryTotal += catValDiff;
-                summary.push({ [catName]: catValDiff.toFixed(2) })
+                summary[catName] = catValDiff.toFixed(2);
             }
         })
         const taxDiff = (this._billData.tax.val - prevBill.tax.val) || 0;
