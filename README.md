@@ -6,7 +6,7 @@ Sends a notification (currently an SQS email endpoint) whenever the detailed bil
 
 The body of the email is a a JSON object which consists of 2 main sections structuring exactly the same: the "diffs" and the current bill totals. Each section starts with a summary of totals for each category. Then there's an array of categories sorted by amount in descending order. Each category contains an array of details also sorted by amount descending.
 
-For some purchases in AWS you are invoiced immediately (domain regeistration, for example) instead of after the end of the month. Those will show up in the paid array at the end and have the same structure as the diffs and current sections.
+For some purchases in AWS you are invoiced immediately (domain registration, for example) instead of after the end of the month. Those will show up in the paid array at the end and have the same structure as the diffs and current sections.
 
 <details>
 <summary>click to expand</summary>
