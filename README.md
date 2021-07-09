@@ -1,19 +1,21 @@
 # AWS Bill Update Notifier
 
-Sends a notification (currently an SQS email endpoint) whenever the detailed bill is updated by AWS. Email contains JSON data with the differences from yesterday's version of the bill and the current totals, grouped by category (ProductCode) and details (UsageType).
+Sends a notification (currently an SQS email endpoint) whenever the detailed billing report (DBR) is updated by AWS. Email contains JSON data with the differences from yesterday's version of the bill and the current totals, grouped by category (ProductCode) and details (UsageType).
 
 ## Example output
 
-The body of the email is a a JSON object which consists of 2 main sections structuring exactly the same: the "diffs" and the current bill totals. Each section starts with a summary of totals for each category. Then there's an array of categories sorted by amount in descending order. Each category contains an array of details also sorted by amount descending.
+The body of the email is a JSON object which consists of 2 main sections with the same structure: the "diffs" and the current bill totals. Each section starts with a summary of totals for each category. Then there's an array of categories sorted by amount (cost) in descending order. Each category contains an array of details also sorted by amount descending.
 
-For some purchases in AWS you are invoiced immediately (domain registration, for example) instead of after the end of the month. Those will show up in the paid array at the end and have the same structure as the diffs and current sections.
+The diffs will also include details with $0.00 cost if the usage quantity is different. (TODO: make this optional)
+
+For some purchases in AWS you are invoiced immediately (domain registration, for example) instead of the monthly invoice. Those will show up in the paid array at the end and have the same structure as the diffs and current sections.
 
 <details>
 <summary>click to expand</summary>
 
 ```
 {
-    "msg": "retrieving 6xxxxxxxxxx1-aws-billing-csv-2021-07.csv from gnarly-billing",
+    "msg": "retrieving 6xxxxxxxxxx1-aws-billing-csv-2021-07.csv from {DBR_BUCKET}",
     "timestamp": 1625782269686,
     "localTime": "2021-07-08T15:11:09",
     "diffs": {
