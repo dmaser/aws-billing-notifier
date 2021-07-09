@@ -54,7 +54,7 @@ export interface BillData {
 export interface BillCheckResult {
     msg: string;
     timestamp: number;
-    dateTime: string;
+    localTime: string;
     diffs?: BillData;
     current: BillData | null;
     paid: BillData[];

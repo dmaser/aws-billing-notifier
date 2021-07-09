@@ -31,14 +31,14 @@ exports.handler = async function (event: any) {
 
         console.log('S3EventRecord match found: ', JSON.stringify(matchedRecord));
 
-        let billCheckResult: BillCheckResult = { msg: '', timestamp: 0, dateTime: '', diffs: undefined, current: null, paid: [], error: '', diff: null };
+        let billCheckResult: BillCheckResult = { msg: '', timestamp: 0, localTime: '', diffs: undefined, current: null, paid: [], error: '', diff: null };
         try {
 
             const bucket = matchedRecord.s3.bucket.name;
             const key = matchedRecord.s3.object.key;
             billCheckResult.msg = `retrieving ${key} from ${bucket}`;
             billCheckResult.timestamp = cal.date().getTime();
-            billCheckResult.dateTime = cal.now();
+            billCheckResult.localTime = cal.now();
 
             const billDataTool: BillDataTool = new BillDataTool(key, cal);
             const obj = await billDataTool.fetchCurrentBill(billBucket);
