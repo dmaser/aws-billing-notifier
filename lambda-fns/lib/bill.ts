@@ -177,7 +177,7 @@ export class Bill {
             const cDetail = curDetails.find(c => c.usageType === usageType);
             if (pDetail || cDetail) {
                 const usageType = pDetail?.usageType || cDetail?.usageType || 'error';
-                const usageQty = (cDetail?.usageQty.toJSON() || 0) - (pDetail?.usageQty.toJSON() || 0);
+                const usageQty = (cDetail?.usageQty.val || 0) - (pDetail?.usageQty.val || 0);
                 const amount = (cDetail?.amount.val || 0) - (pDetail?.amount.val || 0);
                 // console.log(`usageQty diff: ${usageQty}, amount diff: ${amount}`);
                 if (usageQty > 0 || amount > 0) {
