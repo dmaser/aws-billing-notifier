@@ -134,18 +134,18 @@ export class Bill {
         catNames.forEach(catName => {
             const curCat = curMap.get(catName);
             const prevCat = prevMap.get(catName);
-            const catValDiff = (curCat?.amount.val || 0) - (prevCat?.amount.val || 0);
+            const catAmountDiff = (curCat?.amount.val || 0) - (prevCat?.amount.val || 0);
             const curDetails = curCat?.details || [];
             const prevDetails = prevCat?.details || [];
             const detailDiff = this.diffDetails(prevDetails, curDetails);
-            if (catValDiff > 0 || detailDiff.length) {
+            if (catAmountDiff > 0 || detailDiff.length) {
                 categories.push({
                     name: catName,
-                    amount: new Amount(catValDiff),
+                    amount: new Amount(catAmountDiff),
                     details: detailDiff
                 });
-                categoryTotal += catValDiff;
-                summary[catName] = catValDiff.toFixed(2);
+                categoryTotal += catAmountDiff;
+                summary[catName] = catAmountDiff.toFixed(2);
             }
         })
         const taxDiff = (this._billData.tax.val - prevBill.tax.val) || 0;
