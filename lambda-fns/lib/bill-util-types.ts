@@ -12,7 +12,7 @@ export class Amount {
     }
 
     public toString = (): string => {
-        return String(this.trunc() || 0);
+        return this._prefix + String(this.trunc() || 0);
     }
 
     public toJSON = (): number => {
