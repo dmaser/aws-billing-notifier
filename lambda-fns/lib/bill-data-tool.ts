@@ -1,4 +1,4 @@
-import { Amount, BillData } from './bill-util-types';
+import { Amount, BillData, USAGE_QTY_PRECISION } from './bill-util-types';
 import { Cal } from './cal';
 import s3 = require('aws-sdk/clients/s3');
 
@@ -37,7 +37,7 @@ export class BillDataTool {
 
     private reviver = (key: string, value: any) => {
         if (key === 'usageQty' || key === 'amount' || key === 'tax') {
-            value = new Amount(value);
+            value = new Amount(value, key === 'usageQty' ? USAGE_QTY_PRECISION : 2);
         }
         return value;
     }

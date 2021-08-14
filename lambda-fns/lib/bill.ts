@@ -177,14 +177,14 @@ export class Bill {
             const cDetail = curDetails.find(c => c.usageType === usageType);
             if (pDetail || cDetail) {
                 const usageType = pDetail?.usageType || cDetail?.usageType || 'error';
-                const usageQty = (cDetail?.usageQty.val || 0) - (pDetail?.usageQty.val || 0);
-                const amount = (cDetail?.amount.val || 0) - (pDetail?.amount.val || 0);
-                // console.log(`usageQty diff: ${usageQty}, amount diff: ${amount}`);
-                if (usageQty > 0 || amount > 0) {
+                const usageQty = new Amount((cDetail?.usageQty.val || 0) - (pDetail?.usageQty.val || 0), USAGE_QTY_PRECISION, '');
+                const amount = new Amount((cDetail?.amount.val || 0) - (pDetail?.amount.val || 0));
+                console.log(`usageQty diff: ${usageQty}, amount diff: ${amount}`);
+                if (usageQty.toJSON() > 0 || amount.toJSON() > 0) {
                     details.push({
                         usageType,
-                        usageQty: new Amount(usageQty, USAGE_QTY_PRECISION, ''),
-                        amount: new Amount(amount)
+                        usageQty,
+                        amount
                     });
                 }
             }
