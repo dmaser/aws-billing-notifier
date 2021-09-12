@@ -38,7 +38,7 @@ exports.handler = async function (event: any) {
             const key = matchedRecord.s3.object.key;
             billCheckResult.msg = `retrieving ${key} from ${bucket}`;
             billCheckResult.timestamp = cal.date().getTime();
-            billCheckResult.localTime = cal.now();
+            billCheckResult.localTime = cal.now().replace('T', ' ');
 
             const billDataTool: BillDataTool = new BillDataTool(key, cal);
             const obj = await billDataTool.fetchCurrentBill(billBucket);
@@ -59,7 +59,7 @@ exports.handler = async function (event: any) {
 
         } catch (e) {
             console.error('error retrieving object: ', e);
-            billCheckResult.error = e;
+            billCheckResult.error = e as Error;
         }
 
         const totalPaid = billCheckResult.paid.map(p => p.total.val).reduce((prev, curr) => prev + curr, 0);
