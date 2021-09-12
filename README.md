@@ -319,6 +319,8 @@ For some purchases in AWS you are invoiced immediately (domain registration, for
 
 ## Prerequisites
 
+* AWS credentials set up in the usual place (normally ~/.aws/credentials)
+
 * Enable AWS detailed billing
   * TBD - Announced [here](https://aws.amazon.com/blogs/aws/aws-detailed-billing-reports/) in 2012, but [this page](https://docs.aws.amazon.com/cur/latest/userguide/detailed-billing.html) says it's no longer available. I was able to enable DBR in an account created in 2020.
   * Requires setting up an S3 bucket (referenced by the `BILLING_BUCKET` environment variable below) for AWS to write the bill objects to. 
