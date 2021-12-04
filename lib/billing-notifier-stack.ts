@@ -18,7 +18,7 @@ export class BillingNotifierStack extends cdk.Stack {
     super(scope, id, props);
 
     const snsTopic = new Topic(this, 'BillingNotifierTopic', {
-      topicName: 'BillingNotifierTopicName',
+      topicName: 'BillingNotifierTopic',
       displayName: 'Billing Notifier'
     });
 
