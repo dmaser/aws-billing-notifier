@@ -49,7 +49,7 @@ export class BillDataTool {
             const updateObj = await new s3().getObject({ Bucket: updatesBucket, Key: this.prevBillDataKey }).promise();
             return JSON.parse(updateObj.Body as string, this.reviver) as BillData;
         } catch (e) {
-            console.error('failed to readPreviousBill: ', e.message);
+            console.error('failed to readPreviousBill: ', (e as Error).message);
             return null;
         }
     }
